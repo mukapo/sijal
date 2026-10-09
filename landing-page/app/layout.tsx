@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { copy } from "../data/copy";
 import "./globals.css";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-const description = "مبارزات شعرية في عالم عربي صُمِّم للمنافسة، والتقدّم، وبناء المكانة. اكتشف سِجال، حين يصير الشعر ميدانًا.";
+const title = `${copy.brand} | ${copy.headline}`;
+const description = `${copy.description} ${copy.ideaLines.join(" ")}`;
 export const metadata: Metadata = {
     ...(siteUrl ? { metadataBase: new URL(siteUrl), alternates: { canonical: `${basePath}/` } } : {}),
-    title: "سِجَال | حين يصير الشعر ميدانًا", description,
-    openGraph: { title: "سِجَال | حين يصير الشعر ميدانًا", description, siteName: "سِجَال", locale: "ar", type: "website" },
+    title, description,
+    openGraph: { title, description, siteName: copy.brand, locale: "ar", type: "website" },
+    twitter: { card: "summary", title, description },
     icons: { icon: `${basePath}/favicon.svg` },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0D1821" };
