@@ -1,0 +1,48 @@
+name: Sijal landing page
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: landing-page/package-lock.json
+      - name: Install dependencies
+        working-directory: landing-page
+        run: npm ci
+      - name: Configure repository subpath
+        shell: bash
+        run: |
+          repo="${GITHUB_REPOSITORY#*/}"
+          if [[ "$repo" == "${GITHUB_REPOSITORY_OWNER}.github.io" ]]; then
+            echo "NEXT_PUBLIC_BASE_PATH=" >> "$GITHUB_ENV"
+          else
+            echo "NEXT_PUBLIC_BASE_PATH=/$repo" >> "$GITHUB_ENV"
+          fi
+          echo "NEXT_PUBLIC_SITE_URL=https://${GITHUB_REPOSITORY_OWNER}.github.io" >> "$GITHUB_ENV"
+      - name: Check and build
+        working-directory: landing-page
+        run: npm run typecheck && npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: landing-page/out
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
